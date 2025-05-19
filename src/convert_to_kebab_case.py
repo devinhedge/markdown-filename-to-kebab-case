@@ -11,7 +11,6 @@ class MarkdownRenamer:
     Handles renaming of markdown files in a directory to kebab-case filenames.
     """
     def __init__(self, directory_path: str):
-        # Store the directory path
         self.directory_path = directory_path
 
     def rename_markdown_files_to_kebab_case(self):
@@ -58,22 +57,60 @@ class MarkdownRenamer:
 
 
 def get_valid_directory_path_from_user(command_line_path_argument: Optional[str]) -> Optional[str]:
-    # Purpose: Obtain a valid and user-confirmed directory path
-    # 1. Use supplied argument or prompt user
-    # 2. Check if path exists and is a directory
-    # 3. Confirm with user
-    # 4. Handle errors and allow quitting
-    pass
-
+    """
+    Obtain a valid and user-confirmed directory path.
+    Prompts the user for a directory path if not provided, validates it, and confirms with the user.
+    Returns the validated path string, or None if the user quits.
+    """
+    potential_pathname = command_line_path_argument
+    while True:
+        if not potential_pathname or str(potential_pathname).strip() == "":
+            potential_pathname = input("Please enter the target directory path (or type 'quit' to exit): ").strip()
+            if potential_pathname.lower() == "quit":
+                return None
+            if not potential_pathname:
+                print("No path entered. Please try again or type 'quit' to exit.")
+                continue
+        if os.path.exists(potential_pathname) and os.path.isdir(potential_pathname):
+            user_confirmation_choice = input(f"Use directory: '{potential_pathname}'? (Y)es, (N)o, (Q)uit: ").strip()
+            if user_confirmation_choice.upper() == "Y":
+                return potential_pathname
+            elif user_confirmation_choice.upper() == "Q":
+                return None
+            else:
+                print("Directory not confirmed. Please specify a different path.")
+                potential_pathname = None
+                continue
+        else:
+            print(f"Error: The path '{potential_pathname}' either does not exist or is not a directory.")
+            user_choice_on_error = input("Options: (1) Enter a different path, (2) Quit program: ").strip()
+            if user_choice_on_error == "2":
+                return None
+            else:
+                potential_pathname = None
+                continue
 
 def main():
-    # 1. Initialize variables
-    # 2. Check for path argument
-    # 3. Get validated directory path from user
-    # 4. If valid, proceed with renaming
-    # 5. Print completion message
-    pass
-
+    """
+    Main execution flow of the script.
+    """
+    validated_pathname = None
+    command_line_args = sys.argv
+    initial_path_from_args = None
+    if len(command_line_args) > 1:
+        initial_path_from_args = command_line_args[1]
+    print("Starting directory path validation...")
+    validated_pathname = get_valid_directory_path_from_user(initial_path_from_args)
+    if validated_pathname is None:
+        print("No valid directory path provided or user chose to quit. Exiting program.")
+        sys.exit(0)
+    else:
+        print(f"Using directory: '{validated_pathname}'")
+        # 1. Initialize MarkdownRenamer with the validated path
+        renamer = MarkdownRenamer(validated_pathname)
+        # 2. Perform the renaming operation
+        renamer.rename_markdown_files_to_kebab_case()
+        print("All operations completed.")
 
 if __name__ == "__main__":
     main()
